@@ -4,12 +4,14 @@ import {
 } from 'react';
 
 const useFilter = () => {
-  const [filter, setFilter] = useState<Map<string, Set<string>>>(new Map());
-  const filterHandler = (e: MouseEvent) => {
+  const [filterKeywords, setFilterKeywords] = useState<
+    Map<string, Set<string>>
+  >(new Map());
+  const onFilterKeywordsHandler = (e: MouseEvent) => {
     const targetNode = e.target as HTMLInputElement;
     if (!targetNode.dataset.element) return;
     const { name = "", value = "", checked = false } = targetNode;
-    const newFilter = new Map([...filter]);
+    const newFilter = new Map([...filterKeywords]);
     const previousFilterList = newFilter.get(name);
     if (checked) {
       if (previousFilterList)
@@ -21,10 +23,15 @@ const useFilter = () => {
         if (previousFilterList.size === 0) newFilter.delete(name);
       }
     }
-    setFilter(newFilter);
+    setFilterKeywords(newFilter);
   };
 
-  return { filter, filterHandler };
+  return {
+    filterKeywords,
+    onFilterKeywordsHandler,
+    hasFilterKeywords: filterKeywords.size > 0,
+    filterKeywordsKeys: Array.from(filterKeywords.keys()),
+  };
 };
 
 export default useFilter;

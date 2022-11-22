@@ -1,12 +1,16 @@
 type FilterProps = {
   filterList: Array<{ name: string; value: string; description?: string }>;
-  filterHandler: (e: React.MouseEvent<Element, MouseEvent>) => void;
+  onFilterKeywordsHandler: (e: React.MouseEvent<Element, MouseEvent>) => void;
   filterName: string;
 };
 
-const Filter = ({ filterList, filterHandler, filterName }: FilterProps) => {
+const Filter = ({
+  filterList,
+  onFilterKeywordsHandler,
+  filterName,
+}: FilterProps) => {
   return (
-    <div onClick={filterHandler}>
+    <div onClick={onFilterKeywordsHandler}>
       Filter
       {filterList.map((place) => (
         <div key={place.name}>
