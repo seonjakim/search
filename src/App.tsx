@@ -5,8 +5,17 @@ import {
   useState,
 } from 'react';
 
+import useIntersect from './hooks/useIntersect';
+
+const OFFSET = 10;
 function App() {
   const [count, setCount] = useState([]);
+  const [page, setPage] = useState(1);
+
+  const ref = useIntersect(async (entry, observer) => {
+    observer.unobserve(entry.target);
+    setPage((prev) => prev + 1);
+  });
 
   useEffect(() => {
     fetch("https://api.json-generator.com/templates/ePNAVU1sgGtQ/data", {
@@ -21,11 +30,12 @@ function App() {
 
   return (
     <div className="App">
-      {count.map((el, i) => (
+      {count.slice(0, OFFSET * page).map((el, i) => (
         <div style={{ width: "80vw", border: "1px solid red" }} key={i}>
           {JSON.stringify(el)}
         </div>
       ))}
+      <div ref={ref}>observer</div>
     </div>
   );
 }
