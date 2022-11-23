@@ -13,13 +13,21 @@ const globalCss = css({
   "*": {
     boxSizing: "border-box",
     fontFamily: "Inter, Avenir, Helvetica, Arial, sans-serif",
-    fontSize: "16px",
   },
   h6: {
     margin: "0",
   },
   h2: {
     margin: "0",
+  },
+  body: {
+    fontSize: "16px",
+    ":has(.portal)": {
+      overflow: "hidden",
+    },
+  },
+  button: {
+    border: "none",
   },
 });
 

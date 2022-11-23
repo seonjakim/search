@@ -1,6 +1,10 @@
+import { useState } from 'react';
+
 import { css } from '@emotion/react';
 
 import { ProductListType } from '../../api/ProductList.type';
+import Portal from '../Portal/index';
+import ProductDetails from './ProductDetails';
 
 type ProductCardProps = {
   product: ProductListType;
@@ -8,22 +12,31 @@ type ProductCardProps = {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { coverUrl, name, description, place } = product.club || {};
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   return (
-    <div css={productCardContainer}>
-      <img src={coverUrl} alt={name} />
-      <div>
-        <h2>{name}</h2>
-        <h6>
-          {product.leaders.map(
-            (leader) => leader.name !== "" && `${leader.name} 님 `
-          )}
-        </h6>
-        <p>{description}</p>
+    <>
+      <div onClick={() => setIsModalOpen(true)} css={productCardContainer}>
+        <img src={coverUrl} alt={name} />
+        <div>
+          <h2>{name}</h2>
+          <h6>
+            {product.leaders.map(
+              (leader) => leader.name !== "" && `${leader.name} 님 `
+            )}
+          </h6>
+          <p>{description}</p>
+        </div>
+        <div className="product-card-footer">
+          <span>{place}</span>
+        </div>
       </div>
-      <div className="product-card-footer">
-        <span>{place}</span>
-      </div>
-    </div>
+      <Portal isOpen={isModalOpen}>
+        <ProductDetails
+          product={product}
+          goToPrevPage={() => setIsModalOpen(false)}
+        />
+      </Portal>
+    </>
   );
 };
 
