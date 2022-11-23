@@ -1,5 +1,3 @@
-import './App.css';
-
 import {
   useEffect,
   useState,
@@ -8,6 +6,7 @@ import {
 import { ProductList } from './api/ProductList';
 import { ProductListType } from './api/ProductList.type';
 import Filter from './components/Filter';
+import ProductCard from './components/ProductList/ProductCard';
 import {
   clubTypes,
   places,
@@ -16,26 +15,23 @@ import useFilter from './hooks/useFilter';
 import useIntersect from './hooks/useIntersect';
 
 const OFFSET = 10;
+const FIRST_PAGE = 1;
 function App() {
   type FilterKeyType = "place" | "type";
   const [initialProductList, setInitialProductList] = useState<
     Array<ProductListType>
   >([]);
-  const [page, setPage] = useState(1);
+  const [pageNumber, setPageNumber] = useState(FIRST_PAGE);
   const [filteredProductList, setFilteredProductList] = useState<
     Array<ProductListType>
   >([]);
-  const {
-    filterKeywords,
-    onFilterKeywordsHandler,
-    hasFilterKeywords,
-    filterKeywordsKeys,
-  } = useFilter();
+  const { filterKeywords, onFilterKeywordsHandler, hasFilterKeywords } =
+    useFilter();
 
   const ref = useIntersect(async (entry, observer) => {
     observer.unobserve(entry.target);
-    if (OFFSET * page < filteredProductList.length) {
-      setPage((prev) => prev + 1);
+    if (OFFSET * pageNumber < filteredProductList.length) {
+      setPageNumber((prevPage) => prevPage + 1);
     }
   });
 
@@ -49,26 +45,28 @@ function App() {
     };
     apiCall();
   }, []);
+  // 적용버튼을 눌러서 적용되게 한다면 useCallback이나 useMemo으로 변경하기
   useEffect(() => {
     let newFilteredProductList = initialProductList;
     if (hasFilterKeywords) {
       newFilteredProductList = initialProductList.filter((productList) => {
-        const existKeywords = filterKeywordsKeys.filter((keyword) =>
-          filterKeywords
-            .get(keyword)
-            ?.has(productList.club[keyword as FilterKeyType])
+        const existKeywords = Array.from(filterKeywords.keys()).filter(
+          (keyword) =>
+            filterKeywords
+              .get(keyword)
+              ?.has(productList.club[keyword as FilterKeyType])
         );
         if (existKeywords.length) return productList;
       });
     }
     setFilteredProductList(newFilteredProductList);
-    setPage(1);
-  }, [filterKeywords]);
+    setPageNumber(FIRST_PAGE);
+  }, [filterKeywords, initialProductList, hasFilterKeywords]);
 
   const productListInView = <T,>(
     productList: T[],
-    numberOfProduct: number
-  ): T[] => productList.slice(0, numberOfProduct);
+    numberOfProducts: number
+  ): T[] => productList.slice(0, numberOfProducts);
 
   return (
     <div className="App">
@@ -82,11 +80,11 @@ function App() {
         filterList={clubTypes}
         onFilterKeywordsHandler={onFilterKeywordsHandler}
       />
-      {productListInView(filteredProductList, OFFSET * page).map((el, i) => (
-        <div style={{ width: "80vw", border: "1px solid red" }} key={i}>
-          {JSON.stringify(el)}
-        </div>
-      ))}
+      {productListInView(filteredProductList, OFFSET * pageNumber).map(
+        (product) => (
+          <ProductCard key={product.club.id} product={product} />
+        )
+      )}
       {/* TODO: 리스트가 없을 때 발생할 수 있는 오류 해결 */}
       {filteredProductList.length && <div ref={ref}>observer</div>}
     </div>

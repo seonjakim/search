@@ -11,26 +11,25 @@ const useFilter = () => {
     const targetNode = e.target as HTMLInputElement;
     if (!targetNode.dataset.element) return;
     const { name = "", value = "", checked = false } = targetNode;
-    const newFilter = new Map([...filterKeywords]);
-    const previousFilterList = newFilter.get(name);
+    const newFilterKeywords = new Map([...filterKeywords]);
+    const previousFilterList = newFilterKeywords.get(name);
     if (checked) {
       if (previousFilterList)
-        newFilter.set(name, previousFilterList.add(value));
-      else newFilter.set(name, new Set([value]));
+        newFilterKeywords.set(name, previousFilterList.add(value));
+      else newFilterKeywords.set(name, new Set([value]));
     } else {
       if (previousFilterList) {
         previousFilterList.delete(value);
-        if (previousFilterList.size === 0) newFilter.delete(name);
+        if (previousFilterList.size === 0) newFilterKeywords.delete(name);
       }
     }
-    setFilterKeywords(newFilter);
+    setFilterKeywords(newFilterKeywords);
   };
 
   return {
     filterKeywords,
     onFilterKeywordsHandler,
     hasFilterKeywords: filterKeywords.size > 0,
-    filterKeywordsKeys: Array.from(filterKeywords.keys()),
   };
 };
 
