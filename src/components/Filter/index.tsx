@@ -1,17 +1,16 @@
+import { useProductListContext } from '../../providers/ProductListProvider';
+
 type FilterProps = {
   filterList: Array<{ name: string; value: string; description?: string }>;
-  onFilterKeywordsHandler: (e: React.MouseEvent<Element, MouseEvent>) => void;
   filterName: string;
+  title: string;
 };
 
-const Filter = ({
-  filterList,
-  onFilterKeywordsHandler,
-  filterName,
-}: FilterProps) => {
+const Filter = ({ filterList, filterName, title }: FilterProps) => {
+  const { onFilterKeywordsHandler, filterKeywords } = useProductListContext();
   return (
     <div onClick={onFilterKeywordsHandler}>
-      Filter
+      <h4>{title}</h4>
       {filterList.map((place) => (
         <div key={place.name}>
           <input
@@ -19,6 +18,7 @@ const Filter = ({
             name={filterName}
             value={place.value}
             data-element="filter"
+            defaultChecked={filterKeywords.get(filterName)?.has(place.value)}
           />
           <label htmlFor={place.value}>{place.name}</label>
           {place?.description && <div>{place.description}</div>}

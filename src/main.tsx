@@ -8,6 +8,7 @@ import {
 } from '@emotion/react';
 
 import App from './App';
+import ProductListProvider from './providers/ProductListProvider';
 
 const globalCss = css({
   "*": {
@@ -34,6 +35,8 @@ const globalCss = css({
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Global styles={globalCss} />
-    <App />
+    <ProductListProvider>
+      <App />
+    </ProductListProvider>
   </React.StrictMode>
 );
