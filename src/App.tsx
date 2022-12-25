@@ -1,38 +1,53 @@
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useRef, useState } from 'react'
 
-import { ProductList } from './api/ProductList';
-import ProductCard from './components/ProductList/ProductCard';
-import SearchBar from './components/SearchBar';
-import useIntersect from './hooks/useIntersect';
-import { useProductListContext } from './providers/ProductListProvider';
+import { ProductList } from './api/ProductList'
+import ProductCard from './components/ProductList/ProductCard'
+import SearchBar from './components/SearchBar'
+import useIntersect from './hooks/useIntersect'
+import { useProductListContext } from './providers/ProductListProvider'
+import { useInfiniteScroll } from './utils/infiniteScroll'
 
-const OFFSET = 10;
-const FIRST_PAGE = 1;
+const OFFSET = 10
+const FIRST_PAGE = 1
 function App() {
-  const [pageNumber, setPageNumber] = useState(FIRST_PAGE);
+  const [pageNumber, setPageNumber] = useState(FIRST_PAGE)
+  const topEl = useRef(null)
+  const bottomEl = useRef(null)
 
-  const { setInitialProductList, filteredProductList, setFilteredProductList } =
-    useProductListContext();
+  const {
+    setInitialProductList,
+    filteredProductList,
+    setFilteredProductList,
+    initialProductList,
+  } = useProductListContext()
 
-  const ref = useIntersect(async (entry, observer) => {
-    observer.unobserve(entry.target);
-    if (OFFSET * pageNumber < filteredProductList.length) {
-      setPageNumber((prevPage) => prevPage + 1);
-    }
-  });
+  const { topObserver, bottomObserver } = useInfiniteScroll({
+    listLength: initialProductList.length,
+    page: pageNumber,
+    updatePage: setPageNumber,
+    apiCall: setFilteredProductList,
+    topElement: topEl.current,
+    bottomElement: bottomEl.current,
+  })
+  // const ref = useIntersect(async (entry, observer) => {
+  //   observer.unobserve(entry.target)
+  //   if (OFFSET * pageNumber < filteredProductList.length) {
+  //     setPageNumber((prevPage) => prevPage + 1)
+  //   }
+  // })
 
   useEffect(() => {
+    console.log('page', pageNumber)
+  }, [pageNumber])
+  useEffect(() => {
     const apiCall = async () => {
-      const response = await ProductList.getProductList();
+      const response = await ProductList.getProductList()
       if (response?.data) {
-        setInitialProductList(response.data);
+        setInitialProductList(response.data)
       }
-    };
-    apiCall();
-  }, []);
+    }
+    apiCall()
+  }, [])
   // page 1로 변경하는거는 filteredProductList 바뀌면 무조건 바뀌게 하자?? string으로 변환해서 비교하면 괜찮을수도?
 
   // 적용버튼을 눌러서 적용되게 한다면 useCallback이나 useMemo으로 변경하기
@@ -56,7 +71,7 @@ function App() {
   const productListInView = <T,>(
     productList: T[],
     numberOfProducts: number
-  ): T[] => productList.slice(0, numberOfProducts);
+  ): T[] => productList.slice(0, numberOfProducts)
 
   // const isSubString = (
   //   originString: string,
@@ -79,15 +94,17 @@ function App() {
   return (
     <div className="App">
       <SearchBar />
+      <div ref={topEl}></div>
       {productListInView(filteredProductList, OFFSET * pageNumber).map(
         (product) => (
           <ProductCard key={product.club.id} product={product} />
         )
       )}
       {/* TODO: 리스트가 없을 때 발생할 수 있는 오류 해결 */}
-      {filteredProductList.length > 0 && <div ref={ref}>observer</div>}
+      {/* {filteredProductList.length > 0 && <div ref={ref}>observer</div>} */}
+      {filteredProductList.length > 0 && <div ref={bottomEl}></div>}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
